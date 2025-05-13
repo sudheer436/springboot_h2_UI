@@ -1,0 +1,5 @@
+com\javatechie\aws\User.class
+com\javatechie\aws\Application.class
+com\javatechie\aws\UserRepository.class
+com\javatechie\aws\UserService.class
+com\javatechie\aws\UserController.class

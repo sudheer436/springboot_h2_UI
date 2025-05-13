@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Simple User CRUD</title>
+    <style>
+        body { font-family: Arial; padding: 20px; }
+        input, button { margin: 5px; padding: 5px; }
+        table { border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #ccc; padding: 8px; }
+    </style>
+</head>
+<body>
+
+    <h1>User Management</h1>
+
+    <div>
+        <input type="text" id="name" placeholder="Name">
+        <input type="email" id="email" placeholder="Email">
+        <button onclick="createUser()">Add User</button>
+    </div>
+
+    <table id="userTable">
+        <thead>
+            <tr><th>ID</th><th>Name</th><th>Email</th><th>Actions</th></tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <script>
+        const apiBase = 'http://localhost:8080/api/users';
+
+        async function fetchUsers() {
+            const res = await fetch(apiBase);
+            const users = await res.json();
+            const tbody = document.querySelector('#userTable tbody');
+            tbody.innerHTML = '';
+            users.forEach(user => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${user.id}</td>
+                        <td><input value="${user.name}" id="name-${user.id}"></td>
+                        <td><input value="${user.email}" id="email-${user.id}"></td>
+                        <td>
+                            <button onclick="updateUser(${user.id})">Update</button>
+                            <button onclick="deleteUser(${user.id})">Delete</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        async function createUser() {
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            if (!name || !email) return alert('Name and Email are required');
+
+            await fetch(apiBase, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, email })
+            });
+            document.getElementById('name').value = '';
+            document.getElementById('email').value = '';
+            fetchUsers();
+        }
+
+        async function updateUser(id) {
+            const name = document.getElementById(`name-${id}`).value;
+            const email = document.getElementById(`email-${id}`).value;
+
+            await fetch(`${apiBase}/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, email })
+            });
+            fetchUsers();
+        }
+
+        async function deleteUser(id) {
+            await fetch(`${apiBase}/${id}`, { method: 'DELETE' });
+            fetchUsers();
+        }
+
+        // Load users on page load
+        fetchUsers();
+    </script>
+
+</body>
+</html>
